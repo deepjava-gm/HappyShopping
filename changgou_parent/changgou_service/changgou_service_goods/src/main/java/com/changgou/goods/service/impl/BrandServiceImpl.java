@@ -3,8 +3,10 @@ package com.changgou.goods.service.impl;
 import com.changgou.goods.dao.BrandMapper;
 import com.changgou.goods.service.BrandService;
 import com.changgou.goods.pojo.Brand;
+import com.changgou.util.PinYinUtils;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -39,14 +41,32 @@ public class BrandServiceImpl implements BrandService {
 
 
     /**
-     * 增加
+     * 新增品牌
+     *
      * @param brand
      */
     @Override
-    public void add(Brand brand){
-        brandMapper.insert(brand);
-    }
+    public void add(Brand brand) {
 
+
+        String name = brand.getName();
+        if (StringUtils.isBlank(name)) {
+            throw new RuntimeException("参数非法");
+        }
+
+        // 1 判断 填写 品牌首字母
+        String letter = brand.getLetter();
+        if (StringUtils.isBlank(letter)) {  // 没传参数
+            letter = PinYinUtils.getFirstLetter(name);  //  name ? null
+        } else {
+            // 转成大小存储到数据库
+            letter = letter.toUpperCase();
+        }
+        brand.setLetter(letter);
+
+
+        brandMapper.insertSelective(brand);
+    }
 
     /**
      * 修改
