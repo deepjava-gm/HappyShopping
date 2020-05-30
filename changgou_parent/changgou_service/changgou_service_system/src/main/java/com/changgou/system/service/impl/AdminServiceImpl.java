@@ -6,6 +6,7 @@ import com.changgou.system.pojo.Admin;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
@@ -44,7 +45,15 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     public void add(Admin admin){
+
+//        对用户密码进行解密
+        String password = admin.getPassword();
+        String gensalt = BCrypt.gensalt();
+        String hashpw = BCrypt.hashpw(password, gensalt);
+        admin.setPassword(hashpw);
+
         adminMapper.insert(admin);
+
     }
 
 
@@ -104,6 +113,8 @@ public class AdminServiceImpl implements AdminService {
         return (Page<Admin>)adminMapper.selectByExample(example);
     }
 
+
+
     /**
      * 构建查询对象
      * @param searchMap
@@ -133,6 +144,28 @@ public class AdminServiceImpl implements AdminService {
 
         }
         return example;
+    }
+
+    /**
+     * 用户登录
+     * @param admin
+     * @return
+     */
+    @Override
+    public boolean login(Admin admin) {
+        //根据登录名获取管理员信息
+        Admin admin1 = new Admin();
+        admin1.setLoginName(admin.getLoginName());
+        admin1.setStatus("1");
+        Admin adminResult = adminMapper.selectOne(admin1);
+
+        if (adminResult == null){
+            return false;
+        }else{
+            //对密码进行校验
+            return BCrypt.checkpw(admin.getPassword(),adminResult.getPassword());
+        }
+        //返回结果
     }
 
 }

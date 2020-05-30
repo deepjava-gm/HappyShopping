@@ -17,13 +17,16 @@ spring:
           uri: lb://goods
           predicates:
             - Path=/goods/**
-          filters:
+
+          filters:   #对goods进行限流配置
             - StripPrefix= 1
             - name: RequestRateLimiter #请求数限流 名字不能随便写
               args:
                 key-resolver: "#{@ipKeyResolver}"
                 redis-rate-limiter.replenishRate: 1 #令牌桶每秒填充平均速率
                 redis-rate-limiter.burstCapacity: 1 #令牌桶总容量
+
+
         - id: system
           uri: lb://system
           predicates:
