@@ -23,5 +23,6 @@
 
 - [一：第一天、项目搭建、Restful风格、拼音API、txMybatis、品牌增删改查、Swagger](https://blog.csdn.net/qq_37883866/article/details/106416361)
 - [二：B2C电商项目（第二天、项目整体框架的CRUD、跨域解决方案、搭建分布式文件存储FastDFS完成文件上传、搭建微服务网管Gateway解决跨域，微服务网关过滤器过滤器）](https://blog.csdn.net/qq_37883866/article/details/106434561)
+- [三：B2C电商项目（第三天、网关限流、Bcrypt密码加密、Base64编码、JWT微服务鉴权）](https://blog.csdn.net/qq_37883866/article/details/106436937)
 
 
