@@ -1,5 +1,6 @@
 package com.changgou.goods.service;
 
+import com.changgou.goods.pojo.Goods;
 import com.changgou.goods.pojo.Spec;
 import com.github.pagehelper.Page;
 
@@ -20,6 +21,8 @@ public interface SpecService {
      * @return
      */
     Spec findById(Integer id);
+
+
 
     /***
      * 新增
@@ -70,5 +73,8 @@ public interface SpecService {
      * @return
      */
     List<Map> findSpecListByCategoryName(String categoryName);
+
+
+
 
 }
