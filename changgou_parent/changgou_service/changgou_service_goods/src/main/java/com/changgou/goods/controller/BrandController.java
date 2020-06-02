@@ -110,7 +110,7 @@ public class BrandController {
      * @param size
      * @return
      */
-    @GetMapping(value = "/search/{page}/{size}" )
+    @GetMapping(value = "/searchPage/{page}/{size}" )
     @ApiOperation("分页")
     public Result findPage(@RequestParam Map searchMap, @PathVariable  int page, @PathVariable  int size){
         Page<Brand> pageList = brandService.findPage(searchMap, page, size);
