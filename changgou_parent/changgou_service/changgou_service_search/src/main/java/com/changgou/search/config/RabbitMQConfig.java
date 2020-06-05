@@ -1,4 +1,4 @@
-package com.itheima.canal.config;
+package com.changgou.search.config;
 
 import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -6,8 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class RabbitMQConfig
-{
+public class RabbitMQConfig {
 
     //定义交换机名称
     public static final String GOODS_UP_EXCHANGE="goods_up_exchange";

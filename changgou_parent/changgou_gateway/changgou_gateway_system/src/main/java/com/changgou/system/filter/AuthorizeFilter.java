@@ -59,11 +59,14 @@ public class AuthorizeFilter implements GlobalFilter, Ordered {
             e.printStackTrace();
 //            令牌解析失败  向客户端返回错误信息
             response.setStatusCode(HttpStatus.UNAUTHORIZED);
-            return   response.setComplete();
+            return response.setComplete();
         }
 
 
 //        6.2、如果令牌合法则放行
+
+//        同时可以重置token的有效时间
+
         return chain.filter(exchange);
 
     }

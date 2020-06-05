@@ -9,6 +9,7 @@ import java.io.IOException;
 @Component
 public class AdListener {
 
+
     @RabbitListener(queues = "ad_update_queue")
     public void receiveMessage(String message){
         System.out.println("接收到的消息为:"+message);
