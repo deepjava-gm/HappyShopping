@@ -26,5 +26,6 @@
 - [三：B2C电商项目（第三天、网关限流、Bcrypt密码加密、Base64编码、JWT微服务鉴权）](https://blog.csdn.net/qq_37883866/article/details/106436937)
 - [四：B2C电商项目（第四天、品牌与分类关联、根据ID查询商品、商品审核与上下架、商品删除与还原）](https://blog.csdn.net/qq_37883866/article/details/106459925)
 - [五：B2C电商项目（第五天、网站首页高可用nginx+lua、Lua基本语法、nginx+lua+redis、OpenResty、nginx限流、canal同步数据解决方案解决首页广告数据缓存更新）](https://blog.csdn.net/qq_37883866/article/details/106471133)
+- [六：B2C电商项目（第六天、Elasticsearch商品上架添加索引、商品下架删除索引库、商品搜索、多条件分页搜索、排序、高亮显示）](https://blog.csdn.net/qq_37883866/article/details/106519163)
 
 
