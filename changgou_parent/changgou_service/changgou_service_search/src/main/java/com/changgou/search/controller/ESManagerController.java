@@ -29,4 +29,15 @@ public class ESManagerController {
         esManagerService.importAll();
         return new Result(true, StatusCode.OK,"导入全部数据成功");
     }
+
+
+    //导入全部数据
+    @GetMapping("/importAllByPage")
+    public Result importAllByPage() throws Exception {
+        esManagerService.importData();
+        return new Result(true, StatusCode.OK,"分页导入全部数据成功");
+    }
+
+
+
 }

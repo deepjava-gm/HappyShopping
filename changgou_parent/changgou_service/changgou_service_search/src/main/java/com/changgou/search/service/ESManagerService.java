@@ -13,4 +13,9 @@ public interface ESManagerService {
 
     //根据souid删除es索引库中相关的sku数据
     void delDataBySpuId(String spuId);
+
+    /**
+     * 分页导入数据到ES
+     */
+    public void importData() throws Exception;
 }
