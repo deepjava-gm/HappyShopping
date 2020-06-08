@@ -88,6 +88,7 @@ public class PageServiceImpl implements PageService {
         //获取spu
         Spu spu = spuFeign.findSpuById(spuId).getData();
         resultMap.put("spu",spu);
+
         //获取图片信息
         if (spu != null){
             if (StringUtils.isNotEmpty(spu.getImages())){

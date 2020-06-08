@@ -28,5 +28,6 @@
 - [五：B2C电商项目（第五天、网站首页高可用nginx+lua、Lua基本语法、nginx+lua+redis、OpenResty、nginx限流、canal同步数据解决方案解决首页广告数据缓存更新）](https://blog.csdn.net/qq_37883866/article/details/106471133)
 - [六：B2C电商项目（第六天、Elasticsearch商品上架添加索引、商品下架删除索引库、商品搜索、多条件分页搜索、排序、高亮显示）](https://blog.csdn.net/qq_37883866/article/details/106519163)
 - [七：B2C电商项目（第七天、SpringBoot整合thymeleaf实现页面静态化、搜索页面渲染、商品详情页、生成静态页）](https://blog.csdn.net/qq_37883866/article/details/106569341)
+- [八：B2C电商项目（第八天、用户认证、单点登录、Oauth2认证、项目认证开发、认证服务对接网关、登录页、SpringSecurity 权限控制）](https://blog.csdn.net/qq_37883866/article/details/106586882)
 
 
