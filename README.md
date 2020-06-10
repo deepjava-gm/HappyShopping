@@ -21,7 +21,7 @@
 
 **<a name="目录">:notebook:目录(搜索请用ctrl+F)</a>**
 
-- [一：第一天、项目搭建、Restful风格、拼音API、txMybatis、品牌增删改查、Swagger](https://blog.csdn.net/qq_37883866/article/details/106416361)
+- [一：B2C电商项目（第一天、项目搭建、Restful风格、拼音API、txMybatis、品牌增删改查、Swagger）](https://blog.csdn.net/qq_37883866/article/details/106416361)
 - [二：B2C电商项目（第二天、项目整体框架的CRUD、跨域解决方案、搭建分布式文件存储FastDFS完成文件上传、搭建微服务网管Gateway解决跨域，微服务网关过滤器过滤器）](https://blog.csdn.net/qq_37883866/article/details/106434561)
 - [三：B2C电商项目（第三天、网关限流、Bcrypt密码加密、Base64编码、JWT微服务鉴权）](https://blog.csdn.net/qq_37883866/article/details/106436937)
 - [四：B2C电商项目（第四天、品牌与分类关联、根据ID查询商品、商品审核与上下架、商品删除与还原）](https://blog.csdn.net/qq_37883866/article/details/106459925)
@@ -29,5 +29,6 @@
 - [六：B2C电商项目（第六天、Elasticsearch商品上架添加索引、商品下架删除索引库、商品搜索、多条件分页搜索、排序、高亮显示）](https://blog.csdn.net/qq_37883866/article/details/106519163)
 - [七：B2C电商项目（第七天、SpringBoot整合thymeleaf实现页面静态化、搜索页面渲染、商品详情页、生成静态页）](https://blog.csdn.net/qq_37883866/article/details/106569341)
 - [八：B2C电商项目（第八天、用户认证、单点登录、Oauth2认证、项目认证开发、认证服务对接网关、登录页、SpringSecurity 权限控制）](https://blog.csdn.net/qq_37883866/article/details/106586882)
+- [九：B2C电商项目（第九天、购物车模块、订单服务对接oauth、微服务之间认证、登录跳转页面配置）](https://blog.csdn.net/qq_37883866/article/details/106640606)
 
 
