@@ -11,4 +11,5 @@ public interface CategoryFeign {
 
     @GetMapping("/category/{id}")
     public Result<Category> findById(@PathVariable("id") Integer id);
+
 }

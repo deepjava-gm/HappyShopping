@@ -7,7 +7,7 @@ public class UrlFilter {
 
     public static boolean hasAuthorize(String url){
 
-        String[] split = filterPath.replace("**", "").split(",");
+        String[] split = filterPath.replace("/**", "").split(",");
 
         for (String value : split) {
 

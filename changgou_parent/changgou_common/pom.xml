@@ -60,6 +60,13 @@
             <version>5.1.32</version>
         </dependency>
 
+        <!--鉴权-->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.9.0</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 </project>

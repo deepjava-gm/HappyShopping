@@ -57,6 +57,7 @@ public class AuthServiceImpl implements AuthService {
         restTemplate.setErrorHandler(new DefaultResponseErrorHandler(){
             @Override
             public void handleError(ClientHttpResponse response) throws IOException {
+                System.out.println(response.getRawStatusCode());
                 if (response.getRawStatusCode()!=400 && response.getRawStatusCode()!=401){
                     super.handleError(response);
                 }
