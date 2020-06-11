@@ -33,4 +33,6 @@ public class OrderApplication {
     public FeignInterceptor feignInterceptor(){
         return new FeignInterceptor();
     }
+
+
 }
