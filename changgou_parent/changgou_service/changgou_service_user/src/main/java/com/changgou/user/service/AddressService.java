@@ -64,6 +64,8 @@ public interface AddressService {
     Page<Address> findPage(Map<String, Object> searchMap, int page, int size);
 
 
+    //根据当前的登录人名称获取与之相关的收件人地址信息
+    List<Address> list(String username);
 
 
 }

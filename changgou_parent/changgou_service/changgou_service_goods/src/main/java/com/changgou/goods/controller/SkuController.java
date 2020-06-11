@@ -155,4 +155,11 @@ public class SkuController {
         return pageResult;
     }
 
+
+    @PostMapping("/decr/count")
+    public Result decrCount(@RequestParam("username") String username){
+        skuService.decrCount(username);
+        return new Result(true,StatusCode.OK,"库存扣减成功");
+    }
+
 }
