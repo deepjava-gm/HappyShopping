@@ -39,11 +39,11 @@ public interface SkuFeign {
     public Result<Sku> findById(@PathVariable("id") String id);
 
 
-<<<<<<< HEAD
+
     @PostMapping("/sku/decr/count")
     public Result decrCount(@RequestParam("username") String username);
 
     }
-=======
-}
->>>>>>> origin/master
+
+
+
