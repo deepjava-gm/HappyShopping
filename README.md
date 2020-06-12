@@ -30,9 +30,9 @@
 - [七：B2C电商项目（第七天、SpringBoot整合thymeleaf实现页面静态化、搜索页面渲染、商品详情页、生成静态页）](https://blog.csdn.net/qq_37883866/article/details/106569341)
 - [八：B2C电商项目（第八天、用户认证、单点登录、Oauth2认证、项目认证开发、认证服务对接网关、登录页、SpringSecurity 权限控制）](https://blog.csdn.net/qq_37883866/article/details/106586882)
 - [九：B2C电商项目（第九天、购物车模块、订单服务对接oauth、微服务之间认证、登录跳转页面配置）](https://blog.csdn.net/qq_37883866/article/details/106640606)
-<<<<<<< HEAD
 - [十：B2C电商项目（第十天、收件地址管理、地址管理页面渲染、下单业务实现） ](https://blog.csdn.net/qq_37883866/article/details/106664874)
-=======
+- [十一：B2C电商项目（第十一天、分布式事务解决方案、Seata实现分布式事务、消息队列实现分布式事务、订单服务和用户服务业务代码） ](https://blog.csdn.net/qq_37883866/article/details/106677754)
+
 
 
 >>>>>>> origin/master
