@@ -1,9 +1,14 @@
 package com.changgou.order.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fescar.spring.annotation.GlobalTransactional;
 import com.changgou.goods.feign.SkuFeign;
+import com.changgou.order.config.RabbitMQConfig;
 import com.changgou.order.dao.OrderItemMapper;
 import com.changgou.order.dao.OrderMapper;
+import com.changgou.order.dao.TaskMapper;
 import com.changgou.order.pojo.OrderItem;
+import com.changgou.order.pojo.Task;
 import com.changgou.order.service.CartService;
 import com.changgou.order.service.OrderService;
 import com.changgou.order.pojo.Order;
@@ -13,9 +18,11 @@ import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -60,12 +67,16 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderItemMapper orderItemMapper;
+
+    @Autowired
+    private TaskMapper taskMapper;
     /**
      * 增加
      *
      * @param order
      */
     @Override
+    @GlobalTransactional(name = "order_add")
     public void add(Order order) {
 
     //       1. 获取购物车相关数据
@@ -99,8 +110,23 @@ public class OrderServiceImpl implements OrderService {
         skuFeign.decrCount(order.getUsername());
 
 
+//        添加任务数据
+        System.out.println("向订单数据库中的任务表去添加任务数据");
+        Task task = new Task();
+        task.setCreateTime(new Date());
+        task.setUpdateTime(new Date());
+        task.setMqExchange(RabbitMQConfig.EX_BUYING_ADDPOINTUSER);
+        task.setMqRoutingkey(RabbitMQConfig.CG_BUYING_ADDPOINT_KEY);
 
-    //        5. 删除购物车数据
+        Map map = new HashMap();
+        map.put("username",order.getUsername());
+        map.put("orderId",orderId);
+        map.put("point",order.getPayMoney());
+        task.setRequestBody(JSON.toJSONString(map));
+        taskMapper.insertSelective(task);
+
+
+        //        5. 删除购物车数据
         redisTemplate.delete("cart_"+order.getUsername());
 
 

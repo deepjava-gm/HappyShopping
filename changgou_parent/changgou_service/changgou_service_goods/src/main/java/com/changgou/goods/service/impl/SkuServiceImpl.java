@@ -10,6 +10,7 @@ import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
@@ -209,6 +210,7 @@ public class SkuServiceImpl implements SkuService {
      * @param ussername
      */
     @Override
+    @Transactional
     public void decrCount(String ussername) {
 //        1.获取购物车中的数据
         List<OrderItem> orderItemList = redisTemplate.boundHashOps("cart_" + ussername).values();
