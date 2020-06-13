@@ -11,10 +11,7 @@ import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.xml.ws.soap.Addressing;
 import java.util.List;
@@ -67,6 +64,7 @@ public class OrderController {
             }
         }
 
+
         return "order";
     }
 
@@ -79,6 +77,18 @@ public class OrderController {
     public Result add(@RequestBody Order order){
         Result result = orderFeign.add(order);
         return result;
+    }
+
+
+    @GetMapping("/toPayPage")
+    public String toPayPage(String orderId,Model model){
+
+//        获取订单相关信息
+        Order order = (Order) orderFeign.findById(orderId).getData();
+
+        model.addAttribute("orderId",orderId);
+        model.addAttribute("payMoney",order.getPayMoney());
+        return "pay";
     }
 
 }

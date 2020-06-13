@@ -142,6 +142,9 @@ public class UserServiceImpl implements UserService {
             return 0;
         }
 
+
+
+
         //5.记录积分日志信息
         pointLog = new PointLog();
         pointLog.setUserId(username);
@@ -151,6 +154,8 @@ public class UserServiceImpl implements UserService {
         if (result <= 0){
             return 0;
         }
+
+
 
         //6.删除redis中的任务信息
         redisTemplate.delete(task.getId());

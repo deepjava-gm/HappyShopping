@@ -53,8 +53,8 @@ public class OrderController {
         //获取登录人名称
         String username = tokenDecode.getUserInfo().get("username");
         order.setUsername(username);
-        orderService.add(order);
-        return new Result(true,StatusCode.OK,"添加成功");
+        String orderId = orderService.add(order);
+        return new Result(true,StatusCode.OK,"添加成功",orderId);
     }
 
 

@@ -32,7 +32,4 @@
 - [九：B2C电商项目（第九天、购物车模块、订单服务对接oauth、微服务之间认证、登录跳转页面配置）](https://blog.csdn.net/qq_37883866/article/details/106640606)
 - [十：B2C电商项目（第十天、收件地址管理、地址管理页面渲染、下单业务实现） ](https://blog.csdn.net/qq_37883866/article/details/106664874)
 - [十一：B2C电商项目（第十一天、分布式事务解决方案、Seata实现分布式事务、消息队列实现分布式事务、订单服务和用户服务业务代码） ](https://blog.csdn.net/qq_37883866/article/details/106677754)
-
-
-
->>>>>>> origin/master
+- [十二：B2C电商项目（第十二天、微信扫码支付、支付二维码、支付回调逻辑、推送支付通知） ](https://blog.csdn.net/qq_37883866/article/details/106678034)

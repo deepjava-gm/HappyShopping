@@ -394,6 +394,9 @@ $(function(){
                         if (response.data.flag){
                             //添加订单成功
                             alert("添加订单成功");
+                            var orderId=response.data.data;
+                            location.href="/api/worder/toPayPage?orderId="+orderId
+
                         } else{
                             alert("添加订单失败");
                         }
