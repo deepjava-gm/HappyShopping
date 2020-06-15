@@ -6,30 +6,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 作者: kinggm Email:731586355@qq.com
- * 时间:  2020-06-13 19:03
- */
 @Service
-public class WXPayServiceImpl implements WXPayService{
+public class WXPayServiceImpl implements WXPayService {
 
     @Autowired
     private WXPay wxPay;
 
-
     @Value("${wxpay.notify_url}")
     private String notify_url;
 
-    /**
-     * 统一下单接口调用
-     * @param orderId
-     * @param money
-     * @return
-     */
+    //统一下单接口调用
     @Override
     public Map nativePay(String orderId, Integer money) {
         try {
@@ -38,8 +29,8 @@ public class WXPayServiceImpl implements WXPayService{
             map.put("body","畅购");
             map.put("out_trade_no",orderId);
 
-            BigDecimal payMoney = new BigDecimal("0.01");  //money 是以元为单位的
-            BigDecimal fen = payMoney.multiply(new BigDecimal("100")); //元转为分
+            BigDecimal payMoney = new BigDecimal("0.01");
+            BigDecimal fen = payMoney.multiply(new BigDecimal("100")); //1.00
             fen = fen.setScale(0,BigDecimal.ROUND_UP); // 1
             map.put("total_fee",String.valueOf(fen));
 
@@ -50,15 +41,11 @@ public class WXPayServiceImpl implements WXPayService{
             //2.基于wxpay完成统一下单接口的调用,并获取返回结果
             Map<String, String> result = wxPay.unifiedOrder(map);
             return result;
-
         }catch (Exception e){
             e.printStackTrace();
             return null;
         }
-
     }
-
-
 
     @Override
     public Map queryOrder(String orderId) {
@@ -72,4 +59,18 @@ public class WXPayServiceImpl implements WXPayService{
             return null;
         }
     }
+
+    @Override
+    public Map closeOrder(String orderId) {
+        try{
+            Map<String,String> map = new HashMap();
+            map.put("out_trade_no",orderId);
+            Map<String, String> resultMap = wxPay.closeOrder(map);
+            return resultMap;
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 }

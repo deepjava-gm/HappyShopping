@@ -25,6 +25,21 @@ public class RabbitMQConfig {
 
     public static final String ORDER_PAY="order_pay";
 
+
+    //    定义正常队列
+    public static final String ORDER_QUEUE = "queue.ordercreate";
+
+    //    定义死信队列
+    public static final String ORDER_QUEUE_DLX = "queue.ordertimeout";
+
+    //    定义死信交换机
+    public static final String ORDER_EXCHANGE_DLX = "order_exchange_dlx";
+
+    public static final String ORDER_TACK="order_tack";
+
+    public static final String ORDER_PAY_NOTIFY="paynotify";
+
+
     //声明交换机
     @Bean(EX_BUYING_ADDPOINTUSER)
     public Exchange EX_BUYING_ADDPOINTUSER(){
@@ -58,4 +73,49 @@ public class RabbitMQConfig {
         return  new Queue(ORDER_PAY);
     }
 
+
+
+    //    声明正常超时队列
+    @Bean(ORDER_QUEUE)
+    public Queue order1() {
+        return QueueBuilder.durable(ORDER_QUEUE)
+                .withArgument("x-dead-letter-exchange", ORDER_EXCHANGE_DLX) //死信交换机名称
+                .withArgument("x-dead-letter-routing-key", "dlx.order.cancel") //死信队列的路由key
+                .withArgument("x-message-ttl", 60000*10) // 设置队列的过期时间10分钟
+                .build();
+    }
+
+
+    //    声明死信队列
+    @Bean(ORDER_QUEUE_DLX)
+    public Queue order2() {
+        return QueueBuilder.durable(ORDER_QUEUE_DLX).build();
+    }
+
+
+    //  定义死信交换机
+    @Bean(ORDER_EXCHANGE_DLX)
+    public Exchange orderExchangeDLX() {
+        return ExchangeBuilder.topicExchange(ORDER_EXCHANGE_DLX).durable(true).build();
+    }
+
+
+    //    绑定死信交换机和死信队列
+    @Bean
+    public Binding bindingExchange2(@Qualifier(ORDER_QUEUE_DLX) Queue queue,
+                                    @Qualifier(ORDER_EXCHANGE_DLX) Exchange exchange) {
+        return BindingBuilder.bind(queue).to(exchange).with("dlx.order.#").noargs();
+    }
+
+
+    @Bean
+    public Queue ORDER_TACK(){
+        return  new Queue(ORDER_TACK);
+    }
+
+    //    支付成功 通知交换机
+    @Bean
+    public Exchange ORDER_PAY_NOTIFY(){
+        return ExchangeBuilder.fanoutExchange(ORDER_PAY_NOTIFY).durable(true).build();
+    }
 }

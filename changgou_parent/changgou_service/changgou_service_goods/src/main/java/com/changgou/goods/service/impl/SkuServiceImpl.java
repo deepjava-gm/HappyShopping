@@ -1,12 +1,11 @@
 package com.changgou.goods.service.impl;
 
 import com.changgou.goods.dao.SkuMapper;
-import com.changgou.goods.service.SkuService;
 import com.changgou.goods.pojo.Sku;
+import com.changgou.goods.service.SkuService;
 import com.changgou.order.pojo.OrderItem;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -224,5 +223,12 @@ public class SkuServiceImpl implements SkuService {
         }
 
     }
+
+    @Override
+    @Transactional
+    public void resumeStockNum(String skuId, Integer num) {
+        skuMapper.resumeStockNum(skuId, num);
+    }
+
 
 }

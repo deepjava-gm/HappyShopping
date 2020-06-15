@@ -1,15 +1,12 @@
 package com.changgou.goods.feign;
 
-        import com.changgou.entity.PageResult;
-        import com.changgou.entity.Result;
-        import com.changgou.goods.pojo.Sku;
-        import org.springframework.cloud.openfeign.FeignClient;
-        import org.springframework.web.bind.annotation.GetMapping;
-        import org.springframework.web.bind.annotation.PathVariable;
-        import org.springframework.web.bind.annotation.PostMapping;
-        import org.springframework.web.bind.annotation.RequestParam;
+import com.changgou.entity.PageResult;
+import com.changgou.entity.Result;
+import com.changgou.goods.pojo.Sku;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.*;
 
-        import java.util.List;
+import java.util.List;
 
 @FeignClient(name = "goods")
 public interface SkuFeign {
@@ -25,8 +22,9 @@ public interface SkuFeign {
      * 3、 for 循环  遍历页码  page=1  --> totalPages
      * 4、 List集合（每一页的数据）
      * 5、 每一次遍历转换成 skuInfo 数据列表的时候， 就调用一次 导入索引库的方法
+     * <p>
+     * 保证 ElasticSearch 索引库不会内存溢出的问题
      *
-     *  保证 ElasticSearch 索引库不会内存溢出的问题
      * @param spuId
      * @return
      */
@@ -39,11 +37,13 @@ public interface SkuFeign {
     public Result<Sku> findById(@PathVariable("id") String id);
 
 
-
     @PostMapping("/sku/decr/count")
     public Result decrCount(@RequestParam("username") String username);
 
-    }
+    @RequestMapping("/sku/resumeStockNum")
+    public Result resumeStockNum(@RequestParam("skuId") String skuId,@RequestParam("num")Integer num);
+
+}
 
 
 

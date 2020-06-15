@@ -143,8 +143,6 @@ public class UserServiceImpl implements UserService {
         }
 
 
-
-
         //5.记录积分日志信息
         pointLog = new PointLog();
         pointLog.setUserId(username);

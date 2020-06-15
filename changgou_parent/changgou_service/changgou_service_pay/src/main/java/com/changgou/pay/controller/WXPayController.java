@@ -9,24 +9,17 @@ import com.changgou.util.ConvertUtils;
 import com.github.wxpay.sdk.WXPayUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 作者: kinggm Email:731586355@qq.com
- * 时间:  2020-06-13 19:14
- */
 @RequestMapping("/wxpay")
 @RestController
-
 public class WXPayController {
+
     @Autowired
     private WXPayService wxPayService;
 
@@ -35,60 +28,80 @@ public class WXPayController {
 
     //下单
     @GetMapping("/nativePay")
-    public Result nativePay(@RequestParam("orderId") String orderId, @RequestParam("money")Integer money){
+    public Result nativePay(@RequestParam("orderId") String orderId, @RequestParam("money") Integer money) {
         Map resultMap = wxPayService.nativePay(orderId, money);
-        return  new Result(true, StatusCode.OK,"",resultMap);
+        return new Result(true, StatusCode.OK, "", resultMap);
     }
 
-
-
     @RequestMapping("/notify")
-    public void notifyLogic(HttpServletRequest request, HttpServletResponse response){
+    public void notifyLogic(HttpServletRequest request, HttpServletResponse response) {
         System.out.println("支付成功回调");
-        try{
+        try {
             //输入流转换为字符串
             String xml = ConvertUtils.convertToString(request.getInputStream());
             System.out.println(xml);
 
             //基于微信发送的通知内容,完成后续的业务逻辑处理
             Map<String, String> map = WXPayUtil.xmlToMap(xml);
-            if ("SUCCESS".equals(map.get("result_code"))){
+            if ("SUCCESS".equals(map.get("result_code"))) {
 
                 //查询订单
                 Map result = wxPayService.queryOrder(map.get("out_trade_no"));
-                System.out.println("查询订单结果:"+result);
+                System.out.println("查询订单结果:" + result);
 
-                if ("SUCCESS".equals(result.get("result_code"))){
 
-                    //将订单的消息发送到mq'
-                    Map message = new HashMap();
-                    message.put("orderId",result.get("out_trade_no"));
-                    message.put("transactionId",result.get("transaction_id"));
+//                再判断一下支付状态
+                System.out.println("实际支付状态+------------>>>>>" + result.get("trade_state_desc") + "trade_state" + "------>>>>" + result.get("trade_state"));
 
-                    //消息的发送
-                    rabbitTemplate.convertAndSend("", RabbitMQConfig.ORDER_PAY, JSON.toJSONString(message));
+//              这样才行  trade_state是交易状态    result_code 此字段是通信标识，非交易标识，交易是否成功需要查看trade_state来判断
+                if ("SUCCESS".equals(result.get("result_code")) && "SUCCESS".equals(result.get("trade_state"))) {
 
-                    //完成双向通信
-                    rabbitTemplate.convertAndSend("paynotify","",result.get("out_trade_no"));
-                }else {
+//                    if ("SUCCESS".equals(result.get("result_code"))) {
+
+                        //将订单的消息发送到mq
+                        Map message = new HashMap();
+                        message.put("orderId", result.get("out_trade_no"));
+                        message.put("transactionId", result.get("transaction_id"));
+
+                        //消息的发送
+                        rabbitTemplate.convertAndSend("", RabbitMQConfig.ORDER_PAY, JSON.toJSONString(message));
+
+                        //完成双向通信
+                        rabbitTemplate.convertAndSend(RabbitMQConfig.ORDER_PAY_NOTIFY, "", result.get("out_trade_no"));
+
+
+                        //给微信一个结果通知
+                        response.setContentType("text/xml");
+                        String data = "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
+                        response.getWriter().write(data);
+                    } else {
+                        //输出错误原因
+                        System.out.println(map.get("err_code_des"));
+                    }
+
+                } else {
                     //输出错误原因
                     System.out.println(map.get("err_code_des"));
                 }
 
-            }else{
-                //输出错误原因
-                System.out.println(map.get("err_code_des"));
+
+            } catch(Exception e){
+                e.printStackTrace();
             }
 
-
-
-            //给微信一个结果通知
-            response.setContentType("text/xml");
-            String data="<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
-            response.getWriter().write(data);
-        }catch (Exception e){
-            e.printStackTrace();
         }
 
+//基于微信查询订单
+        @GetMapping("/query/{orderId}")
+        public Result queryOrder (@PathVariable("orderId") String orderId){
+            Map map = wxPayService.queryOrder(orderId);
+            return new Result(true, StatusCode.OK, "查询订单成功", map);
+        }
+
+//基于微信关闭订单
+        @PutMapping("/close/{orderId}")
+        public Result closeOrder (@PathVariable("orderId") String orderId){
+            Map map = wxPayService.closeOrder(orderId);
+            return new Result(true, StatusCode.OK, "关闭订单成功", map);
+        }
     }
-}

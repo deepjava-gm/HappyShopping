@@ -21,6 +21,7 @@ public class OrderController {
 
     @Autowired
     private TokenDecode tokenDecode;
+
     /**
      * 查询全部数据
      * @return
@@ -108,6 +109,14 @@ public class OrderController {
         Page<Order> pageList = orderService.findPage(searchMap, page, size);
         PageResult pageResult=new PageResult(pageList.getTotal(),pageList.getResult());
         return new Result(true,StatusCode.OK,"查询成功",pageResult);
+    }
+
+
+
+    @PostMapping("/batchSend")
+    public Result batchSend(@RequestBody List<Order> orders){
+        orderService.batchSend(orders);
+        return new Result(true,StatusCode.OK,"发货成功");
     }
 
 

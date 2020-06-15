@@ -67,4 +67,6 @@ public interface SkuService {
     void decrCount(String ussername);
 
 
+    //回滚库存
+    void resumeStockNum(String skuId,Integer num);
 }

@@ -162,4 +162,11 @@ public class SkuController {
         return new Result(true,StatusCode.OK,"库存扣减成功");
     }
 
+
+    @RequestMapping("/resumeStockNum")
+    public Result resumeStockNum(@RequestParam("skuId") String skuId,@RequestParam("num")Integer num){
+        skuService.resumeStockNum(skuId, num);
+        return new Result(true,StatusCode.OK,"回滚库存成功");
+    }
+
 }

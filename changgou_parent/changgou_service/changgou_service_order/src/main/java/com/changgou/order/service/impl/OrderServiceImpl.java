@@ -4,25 +4,22 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fescar.spring.annotation.GlobalTransactional;
 import com.changgou.goods.feign.SkuFeign;
 import com.changgou.order.config.RabbitMQConfig;
-import com.changgou.order.dao.OrderItemMapper;
-import com.changgou.order.dao.OrderLogMapper;
-import com.changgou.order.dao.OrderMapper;
-import com.changgou.order.dao.TaskMapper;
-import com.changgou.order.pojo.OrderItem;
-import com.changgou.order.pojo.OrderLog;
-import com.changgou.order.pojo.Task;
+import com.changgou.order.dao.*;
+import com.changgou.order.pojo.*;
 import com.changgou.order.service.CartService;
 import com.changgou.order.service.OrderService;
-import com.changgou.order.pojo.Order;
+import com.changgou.pay.feign.PayFeign;
 import com.changgou.util.IdWorker;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -70,6 +67,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private TaskMapper taskMapper;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
     /**
      * 增加
      * @param order
@@ -127,7 +127,12 @@ public class OrderServiceImpl implements OrderService {
         //5.删除购物车数据(redis)
         redisTemplate.delete("cart_"+order.getUsername());
 
+
+        //发送延迟消息
+        rabbitTemplate.convertAndSend("",RabbitMQConfig.ORDER_QUEUE,orderId);
+
         return orderId;
+
     }
 
 
@@ -317,6 +322,179 @@ public class OrderServiceImpl implements OrderService {
 
         }
         return example;
+    }
+
+    @Autowired
+    private PayFeign payFeign;
+
+    @Override
+    @Transactional
+    public void closeOrder(String orderId) {
+        /**
+         * 1.根据订单id查询mysql中的订单信息,判断订单是否存在,判断订单的支付状态
+         * 2. 基于微信查询订单信息(微信)
+         * 2.1)如果当前订单的支付状态为已支付,则进行数据补偿(mysql)
+         * 2.2)如果当前订单的支付状态为未支付,则修改mysql中的订单信息,新增订单日志,恢复商品的库存,基于微信关闭订单
+         */
+        System.out.println("关闭订单业务开启:"+orderId);
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if (order == null){
+            throw new RuntimeException("订单不存在!");
+        }
+        if (!"0".equals(order.getPayStatus())){
+            System.out.println("当前订单不需要关闭");
+            return;
+        }
+        System.out.println("关闭订单校验通过:"+orderId);
+
+        //基于微信查询订单信息
+        Map wxQueryMap = (Map) payFeign.queryOrder(orderId).getData();
+        System.out.println("查询微信支付订单:"+wxQueryMap);
+
+        //如果订单的支付状态为已支付,进行数据补偿(mysql)
+        if ("SUCCESS".equals(wxQueryMap.get("trade_state"))){
+            this.updatePayStatus(orderId,(String) wxQueryMap.get("transaction_id"));
+            System.out.println("完成数据补偿");
+        }
+
+        //如果订单的支付状态为未支付,则修改mysql中的订单信息,新增订单日志,恢复商品的库存,基于微信关闭订单
+        if ("NOTPAY".equals(wxQueryMap.get("trade_state"))){
+            System.out.println("执行关闭");
+            order.setUpdateTime(new Date());
+            order.setOrderStatus("4"); //订单已关闭
+            orderMapper.updateByPrimaryKeySelective(order);
+
+            //新增订单日志
+            OrderLog orderLog = new OrderLog();
+            orderLog.setId(idWorker.nextId()+"");
+            orderLog.setOperater("system");
+            orderLog.setOperateTime(new Date());
+            orderLog.setOrderStatus("4");
+            orderLog.setOrderId(order.getId());
+            orderLogMapper.insert(orderLog);
+
+            //恢复商品的库存
+            OrderItem _orderItem = new OrderItem();
+            _orderItem.setOrderId(orderId);
+            List<OrderItem> orderItemList = orderItemMapper.select(_orderItem);
+
+            for (OrderItem orderItem : orderItemList) {
+                skuFeign.resumeStockNum(orderItem.getSkuId(),orderItem.getNum());
+            }
+
+            //基于微信关闭订单
+            payFeign.closeOrder(orderId);
+
+        }
+
+    }
+
+
+    @Override
+    @Transactional
+    public void batchSend(List<Order> orders) {
+
+        //判断每一个订单的运单号和物流公司的值是否存在
+        for (Order order : orders) {
+            if (order.getId() == null){
+                throw new RuntimeException("订单号不存在!");
+            }
+            if (order.getShippingCode() == null || order.getShippingName() == null){
+                throw new RuntimeException("请输入运单号或物流公司的名称");
+            }
+        }
+
+        //进行订单状态的校验
+        for (Order order : orders) {
+            Order order1 = orderMapper.selectByPrimaryKey(order.getId());
+            if (!"0".equals(order1.getConsignStatus()) || !"1".equals(order1.getOrderStatus())){
+                throw new RuntimeException("订单状态不合法");
+            }
+        }
+
+        //修改订单的状态为已发货
+        for (Order order : orders) {
+            order.setOrderStatus("2"); //已发货
+            order.setConsignStatus("1");//已发货
+            order.setConsignTime(new Date());
+            order.setUpdateTime(new Date());
+            orderMapper.updateByPrimaryKeySelective(order);
+
+            //记录订单日志
+            OrderLog orderLog = new OrderLog();
+            orderLog.setId(idWorker.nextId()+"");
+            orderLog.setOperateTime(new Date());
+            orderLog.setOperater("admin");
+            orderLog.setOrderStatus("2");
+            orderLog.setConsignStatus("1");
+            orderLog.setOrderId(order.getId());
+            orderLogMapper.insertSelective(orderLog);
+        }
+
+
+    }
+
+    @Override
+    @Transactional
+    public void confirmTask(String orderId, String operator) {
+
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if (order == null){
+            throw new RuntimeException("订单不存在");
+        }
+        if (!"1".equals(order.getConsignStatus())){
+            throw new RuntimeException("订单未发货");
+        }
+
+        order.setConsignStatus("2"); //已送达
+        order.setOrderStatus("3"); //已完成
+        order.setUpdateTime(new Date());
+        order.setEndTime(new Date());
+        orderMapper.updateByPrimaryKeySelective(order);
+
+        //记录订单日志
+        OrderLog orderLog = new OrderLog();
+        orderLog.setId(idWorker.nextId()+"");
+        orderLog.setOperateTime(new Date());
+        orderLog.setOperater(operator);
+        orderLog.setOrderStatus("3");
+        orderLog.setConsignStatus("2");
+        orderLog.setOrderId(order.getId());
+        orderLogMapper.insertSelective(orderLog);
+    }
+
+
+
+    @Autowired
+    private OrderConfigMapper orderConfigMapper;
+
+    @Override
+    @Transactional
+    public void autoTack() {
+        /**
+         * 1.从订单配置表中获取到订单自动确认的时间点
+         * 2. 得到当前时间节点,向前数 ( 订单自动确认的时间节点 ) 天,作为过期的时间节点
+         * 3. 从订单表中获取相关符合条件的数据 (发货时间小于过期时间,收货状态为未确认 )
+         * 4.循环遍历,执行确认收货
+         */
+        OrderConfig orderConfig = orderConfigMapper.selectByPrimaryKey(1);
+
+        //获取当前时间
+        LocalDate now = LocalDate.now();
+
+        LocalDate date = now.plusDays(-orderConfig.getTakeTimeout());
+
+        //按条件查询,获取订单列表
+        Example example = new Example(Order.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andLessThan("consignTime",date);
+        criteria.andEqualTo("orderStatus","2");
+        List<Order> orderList = orderMapper.selectByExample(example);
+
+        for (Order order : orderList) {
+            this.confirmTask(order.getId(),"system");
+        }
+
     }
 
 }
